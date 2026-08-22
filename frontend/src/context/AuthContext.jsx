@@ -68,9 +68,17 @@ export function AuthProvider({ children }) {
     setUser((u) => (u ? { ...u, mustChangePassword: false } : u));
   }, []);
 
+  // Re-syncs the navbar/session copy of the current user after edits made
+  // elsewhere (e.g. uploading your own avatar from the profile page).
+  const refreshMe = useCallback(async () => {
+    const { user: me } = await authApi.me();
+    setUser(me);
+    return me;
+  }, []);
+
   const value = useMemo(
-    () => ({ user, status, signIn, signUp, verifyEmail, signOut, changePassword }),
-    [user, status, signIn, signUp, verifyEmail, signOut, changePassword]
+    () => ({ user, status, signIn, signUp, verifyEmail, signOut, changePassword, refreshMe }),
+    [user, status, signIn, signUp, verifyEmail, signOut, changePassword, refreshMe]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

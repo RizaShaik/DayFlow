@@ -54,7 +54,7 @@ async function seed() {
     const { rows: [adminEmployee] } = await client.query(
       `INSERT INTO employees (user_id, company_id, employee_code, first_name, last_name,
                                job_position, work_location, date_of_joining)
-       VALUES ($1, $2, 'EMP001', 'Admin', 'User', 'HR Manager', 'Bengaluru', '2020-01-01')
+       VALUES ($1, $2, 'EMP0001', 'Admin', 'User', 'HR Manager', 'Bengaluru', '2020-01-01')
        RETURNING id`,
       [adminUser.id, company.id]
     );
@@ -70,7 +70,7 @@ async function seed() {
                                phone, department_id, manager_id, job_position, work_location,
                                date_of_joining, about, skills, date_of_birth, gender,
                                marital_status, nationality, personal_email, residing_address)
-       VALUES ($1, $2, 'EMP002', 'John', 'Doe', '+91-9876543210', $3, $4, 'Software Engineer',
+       VALUES ($1, $2, 'EMP0002', 'John', 'Doe', '+91-9876543210', $3, $4, 'Software Engineer',
                'Bengaluru', '2026-01-15', 'Full-stack engineer who enjoys clean architecture.',
                ARRAY['JavaScript', 'PostgreSQL', 'React'], '1996-05-20', 'male', 'single',
                'Indian', 'john.personal@example.com', '221B Baker Street, Bengaluru')
