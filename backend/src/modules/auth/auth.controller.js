@@ -10,8 +10,13 @@ const REFRESH_COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 function setRefreshCookie(res, token) {
   res.cookie(REFRESH_COOKIE_NAME, token, {
     httpOnly: true,
+    // Frontend and backend deploy to separate onrender.com subdomains,
+    // which browsers treat as different sites (onrender.com is on the
+    // public suffix list) — cross-site cookies require SameSite=None,
+    // which in turn requires Secure. Locally (http, same-site ports)
+    // Lax still works and doesn't need Secure.
     secure: isProduction,
-    sameSite: 'lax',
+    sameSite: isProduction ? 'none' : 'lax',
     path: REFRESH_COOKIE_PATH,
     maxAge: REFRESH_COOKIE_MAX_AGE_MS,
   });

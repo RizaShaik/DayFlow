@@ -1,0 +1,88 @@
+databases:
+  - name: dayflow-db
+    plan: free
+    region: oregon
+
+services:
+  - type: web
+    name: dayflow-backend
+    runtime: node
+    plan: free
+    region: oregon
+    rootDir: backend
+    buildCommand: npm install && npm run migrate
+    startCommand: npm start
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_HOST
+        fromDatabase:
+          name: dayflow-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: dayflow-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: dayflow-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: dayflow-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: dayflow-db
+          property: password
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: MAX_UPLOAD_MB
+        value: "5"
+      # Filled in after the frontend's first deploy gives you its real URL —
+      # see the deploy instructions. Leaving this blank makes CORS reject
+      # the frontend's requests until it's set.
+      - key: CLIENT_ORIGIN
+        value: ""
+        sync: false
+      # Optional: real email delivery (verification links, temp passwords).
+      # Left blank, the backend logs these to its own console instead.
+      - key: SMTP_HOST
+        value: ""
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_SECURE
+        value: "false"
+      - key: SMTP_USER
+        value: ""
+        sync: false
+      - key: SMTP_PASSWORD
+        value: ""
+        sync: false
+      - key: SMTP_FROM
+        value: "Dayflow HRMS <no-reply@dayflow.local>"
+
+  - type: web
+    name: dayflow-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      # Filled in after the backend's first deploy gives you its real URL —
+      # Vite bakes these in at build time, so changing them requires a
+      # redeploy of this service, not just an env var update.
+      - key: VITE_API_BASE_URL
+        value: ""
+        sync: false
+      - key: VITE_SOCKET_URL
+        value: ""
+        sync: false
