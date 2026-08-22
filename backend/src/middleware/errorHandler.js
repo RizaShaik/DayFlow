@@ -1,3 +1,4 @@
+import multer from 'multer';
 import { ApiError } from '../utils/ApiError.js';
 import { logger } from '../utils/logger.js';
 import { isProduction } from '../config/env.js';
@@ -9,8 +10,9 @@ export function notFoundHandler(req, res, next) {
 // eslint-disable-next-line no-unused-vars
 export function errorHandler(err, req, res, next) {
   const isApiError = err instanceof ApiError;
-  const statusCode = isApiError ? err.statusCode : 500;
-  const message = isApiError ? err.message : 'Something went wrong';
+  const isMulterError = err instanceof multer.MulterError;
+  const statusCode = isApiError ? err.statusCode : isMulterError ? 400 : 500;
+  const message = isApiError ? err.message : isMulterError ? err.message : 'Something went wrong';
 
   if (statusCode >= 500) {
     logger.error(err.stack || err.message);

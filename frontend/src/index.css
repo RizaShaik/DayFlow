@@ -1,15 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
   --color-surface: 255 255 255;
-  --color-surface-alt: 246 247 249;
-  --color-border: 226 229 233;
-  --color-text: 23 23 23;
-  --color-text-muted: 107 114 128;
-  --color-primary: 79 70 229;
-  --color-primary-hover: 67 56 202;
+  --color-surface-alt: 245 247 250;
+  --color-border: 224 229 236;
+  --color-text: 17 24 39;
+  --color-text-muted: 100 112 130;
+  --color-primary: 18 52 98;
+  --color-primary-hover: 12 38 74;
   --color-success: 22 163 74;
   --color-warning: 202 138 4;
   --color-danger: 220 38 38;
@@ -17,12 +19,12 @@
 
 .dark {
   --color-surface: 17 24 39;
-  --color-surface-alt: 31 41 55;
-  --color-border: 55 65 81;
-  --color-text: 243 244 246;
-  --color-text-muted: 156 163 175;
-  --color-primary: 99 102 241;
-  --color-primary-hover: 129 140 248;
+  --color-surface-alt: 30 41 59;
+  --color-border: 51 65 85;
+  --color-text: 241 245 249;
+  --color-text-muted: 148 163 184;
+  --color-primary: 94 158 224;
+  --color-primary-hover: 130 180 235;
   --color-success: 74 222 128;
   --color-warning: 250 204 21;
   --color-danger: 248 113 113;
@@ -36,4 +38,12 @@ body,
 
 body {
   @apply bg-surface-alt text-text transition-colors duration-150;
+  font-family:
+    'Inter',
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
 }
