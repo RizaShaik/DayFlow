@@ -1,0 +1,4 @@
+-- Dayflow HRMS — reference schema snapshot.
+-- The source of truth is the numbered files in src/db/migrations/;
+-- this file is a convenience full-schema dump kept in sync manually.
+-- Filled in during Phase 1 (Database design & setup).
