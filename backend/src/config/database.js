@@ -4,6 +4,13 @@ import { logger } from '../utils/logger.js';
 
 const { Pool } = pg;
 
+// DATE columns default to JS Date at local midnight, which shifts to the
+// previous day once serialized to UTC in any timezone ahead of UTC (e.g.
+// IST). Keep them as plain 'YYYY-MM-DD' strings — that's all we ever want
+// for date_of_birth/date_of_joining/etc.
+const PG_TYPE_DATE = 1082;
+pg.types.setTypeParser(PG_TYPE_DATE, (value) => value);
+
 export const pool = new Pool({
   host: env.db.host,
   port: env.db.port,
