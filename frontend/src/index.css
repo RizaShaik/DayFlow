@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-surface: 255 255 255;
+  --color-surface-alt: 246 247 249;
+  --color-border: 226 229 233;
+  --color-text: 23 23 23;
+  --color-text-muted: 107 114 128;
+  --color-primary: 79 70 229;
+  --color-primary-hover: 67 56 202;
+  --color-success: 22 163 74;
+  --color-warning: 202 138 4;
+  --color-danger: 220 38 38;
+}
+
+.dark {
+  --color-surface: 17 24 39;
+  --color-surface-alt: 31 41 55;
+  --color-border: 55 65 81;
+  --color-text: 243 244 246;
+  --color-text-muted: 156 163 175;
+  --color-primary: 99 102 241;
+  --color-primary-hover: 129 140 248;
+  --color-success: 74 222 128;
+  --color-warning: 250 204 21;
+  --color-danger: 248 113 113;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-surface-alt text-text transition-colors duration-150;
+}
