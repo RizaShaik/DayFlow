@@ -2,6 +2,7 @@ import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { validate } from '../../middleware/validate.js';
 import { authenticate } from '../../middleware/authenticate.js';
+import { uploadLogo } from '../../middleware/upload.js';
 import * as controller from './auth.controller.js';
 import {
   changePasswordSchema,
@@ -20,7 +21,13 @@ const authAttemptLimiter = rateLimit({
   message: { success: false, error: { message: 'Too many attempts, please try again later' } },
 });
 
-authRouter.post('/signup', authAttemptLimiter, validate(signupSchema), controller.signup);
+authRouter.post(
+  '/signup',
+  authAttemptLimiter,
+  uploadLogo.single('logo'),
+  validate(signupSchema),
+  controller.signup
+);
 authRouter.get(
   '/verify-email/:token',
   validate(verifyEmailParamsSchema, 'params'),

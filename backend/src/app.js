@@ -31,7 +31,17 @@ export function createApp() {
   });
   app.use('/api', apiLimiter);
 
-  app.use('/uploads', express.static('uploads'));
+  // Frontend dev server runs on a different origin (port) than the API, so
+  // helmet's default same-origin CORP would silently block <img>/<a> loads
+  // of uploaded avatars/attachments/logos from the browser.
+  app.use(
+    '/uploads',
+    (req, res, next) => {
+      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+      next();
+    },
+    express.static('uploads')
+  );
   app.use('/api/v1', apiRouter);
 
   app.use(notFoundHandler);

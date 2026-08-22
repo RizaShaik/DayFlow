@@ -76,13 +76,15 @@ export async function findUserByEmailGlobal(client, email) {
 }
 
 export async function nextEmployeeCode(client, companyId) {
+  // Ordering by employee_code as text breaks once codes have different
+  // digit counts ('EMP002' sorts after 'EMP0003' lexicographically) —
+  // cast the numeric suffix and sort on that instead.
   const { rows } = await client.query(
-    `SELECT employee_code FROM employees WHERE company_id = $1 ORDER BY employee_code DESC LIMIT 1`,
+    `SELECT COALESCE(MAX((regexp_match(employee_code, '(\\d+)$'))[1]::int), 0) AS max_num
+     FROM employees WHERE company_id = $1`,
     [companyId]
   );
-  if (rows.length === 0) return 'EMP0001';
-  const match = /(\d+)$/.exec(rows[0].employee_code);
-  const nextNum = match ? Number(match[1]) + 1 : 1;
+  const nextNum = rows[0].max_num + 1;
   return `EMP${String(nextNum).padStart(4, '0')}`;
 }
 

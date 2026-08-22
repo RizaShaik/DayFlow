@@ -32,12 +32,17 @@ export async function getEmployeeByUserId(client, userId) {
   return rows[0] || null;
 }
 
-export async function insertCompany(client, name) {
+export async function insertCompany(client, name, logoUrl) {
   const { rows } = await client.query(
-    `INSERT INTO companies (name) VALUES ($1) RETURNING *`,
-    [name]
+    `INSERT INTO companies (name, logo_url) VALUES ($1, $2) RETURNING *`,
+    [name, logoUrl || null]
   );
   return rows[0];
+}
+
+export async function getCompanyById(client, id) {
+  const { rows } = await client.query(`SELECT * FROM companies WHERE id = $1`, [id]);
+  return rows[0] || null;
 }
 
 export async function insertDefaultLeaveTypes(client, companyId) {

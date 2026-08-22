@@ -23,7 +23,7 @@ function splitName(fullName) {
   return { firstName, lastName };
 }
 
-function toPublicUser(user, employee) {
+function toPublicUser(user, employee, company) {
   return {
     id: user.id,
     loginId: user.login_id,
@@ -31,6 +31,7 @@ function toPublicUser(user, employee) {
     role: user.role,
     mustChangePassword: user.must_change_password,
     emailVerified: user.email_verified,
+    company: company ? { id: company.id, name: company.name, logoUrl: company.logo_url } : null,
     employee: employee
       ? {
           id: employee.id,
@@ -57,14 +58,14 @@ async function issueSession(client, user) {
   return { accessToken, refreshToken };
 }
 
-export async function signup({ companyName, name, email, password }) {
+export async function signup({ companyName, name, email, password }, logoUrl) {
   return withTransaction(async (client) => {
     const existing = await repo.findUserByIdentifier(client, email);
     if (existing) {
       throw ApiError.conflict('An account with this email already exists');
     }
 
-    const company = await repo.insertCompany(client, companyName);
+    const company = await repo.insertCompany(client, companyName, logoUrl);
     await repo.insertDefaultLeaveTypes(client, company.id);
 
     const { firstName, lastName } = splitName(name);
@@ -96,13 +97,20 @@ export async function signup({ companyName, name, email, password }) {
     });
 
     const verifyUrl = `${process.env.CLIENT_ORIGIN || 'http://localhost:5173'}/verify-email/${verificationToken}`;
-    await sendMail({
+    const { delivered } = await sendMail({
       to: email,
       subject: 'Verify your Dayflow account',
       text: `Welcome to Dayflow! Verify your email: ${verifyUrl}\n\nYour login ID is ${loginId} — keep it, you'll use it to sign in.`,
     });
 
-    return { loginId };
+    return {
+      loginId,
+      // Same reasoning as the employee-creation temp password: if it wasn't
+      // actually emailed (no SMTP configured here), the account is
+      // otherwise permanently stuck unverified with no way for a
+      // browser-only user to find the link.
+      verificationUrl: delivered ? undefined : verifyUrl,
+    };
   });
 }
 
@@ -117,9 +125,13 @@ export async function verifyEmail(rawToken) {
 
     await repo.markEmailVerified(client, user.id);
     const employee = await repo.getEmployeeByUserId(client, user.id);
+    const company = await repo.getCompanyById(client, user.company_id);
     const session = await issueSession(client, user);
 
-    return { ...session, user: toPublicUser({ ...user, email_verified: true }, employee) };
+    return {
+      ...session,
+      user: toPublicUser({ ...user, email_verified: true }, employee, company),
+    };
   } finally {
     client.release();
   }
@@ -143,9 +155,10 @@ export async function signin({ identifier, password }) {
     }
 
     const employee = await repo.getEmployeeByUserId(client, user.id);
+    const company = await repo.getCompanyById(client, user.company_id);
     const session = await issueSession(client, user);
 
-    return { ...session, user: toPublicUser(user, employee) };
+    return { ...session, user: toPublicUser(user, employee, company) };
   } finally {
     client.release();
   }
@@ -208,7 +221,8 @@ export async function getCurrentUser(userId) {
     const user = await repo.findUserById(client, userId);
     if (!user) throw ApiError.notFound('User not found');
     const employee = await repo.getEmployeeByUserId(client, user.id);
-    return toPublicUser(user, employee);
+    const company = await repo.getCompanyById(client, user.company_id);
+    return toPublicUser(user, employee, company);
   } finally {
     client.release();
   }

@@ -22,10 +22,12 @@ function clearRefreshCookie(res) {
 }
 
 export const signup = asyncHandler(async (req, res) => {
-  const result = await authService.signup(req.body);
+  const logoUrl = req.file ? `/uploads/logos/${req.file.filename}` : null;
+  const result = await authService.signup(req.body, logoUrl);
   sendSuccess(res, 201, {
     message: 'Account created. Check your email to verify and activate your account.',
     loginId: result.loginId,
+    verificationUrl: result.verificationUrl,
   });
 });
 

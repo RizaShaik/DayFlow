@@ -95,14 +95,17 @@ export async function getDetail(employeeId, requester) {
     const salary = await repo.getSalaryInfo(pool, employeeId);
     detail.salaryInfo = salary
       ? {
-          monthlyWage: salary.structure.monthly_wage,
+          // pg returns NUMERIC columns as strings (avoids float precision
+          // loss); cast explicitly so the API contract is consistently
+          // numeric, matching what the payroll configure endpoint returns.
+          monthlyWage: Number(salary.structure.monthly_wage),
           workingDaysPerWeek: salary.structure.working_days_per_week,
-          breakTimeHours: salary.structure.break_time_hours,
+          breakTimeHours: Number(salary.structure.break_time_hours),
           components: salary.components.map((c) => ({
             type: c.component_type,
             computationType: c.computation_type,
-            value: c.value,
-            amount: c.computed_amount,
+            value: Number(c.value),
+            amount: Number(c.computed_amount),
           })),
         }
       : null;
@@ -166,13 +169,22 @@ export async function createEmployee(requester, payload) {
       dateOfJoining,
     });
 
-    await sendMail({
+    const { delivered } = await sendMail({
       to: payload.email,
       subject: 'Your Dayflow account is ready',
       text: `Welcome to Dayflow!\n\nYour Login ID: ${loginId}\nTemporary password: ${tempPassword}\n\nYou'll be asked to set a new password the first time you sign in.`,
     });
 
-    return { id: employee.id, employeeCode: employee.employee_code, loginId };
+    return {
+      id: employee.id,
+      employeeCode: employee.employee_code,
+      loginId,
+      // Only handed back when it wasn't actually emailed (no SMTP configured
+      // in this environment) — otherwise the admin has no way to learn it,
+      // since it's stored hashed. When real SMTP is configured, this stays
+      // undefined and the employee gets it only via their inbox.
+      tempPassword: delivered ? undefined : tempPassword,
+    };
   });
 }
 
