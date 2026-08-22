@@ -47,6 +47,13 @@ npm run dev              # starts the API on http://localhost:5000
 Verify it's up: `curl http://localhost:5000/api/v1/health` should return
 `{"success":true,"data":{"status":"ok", ...}}`.
 
+**Demo accounts** (created by `npm run seed`):
+
+| Role     | Login ID         | Password      | Notes                        |
+|----------|-------------------|---------------|-------------------------------|
+| Admin/HR | `OIADUS20260001`  | `Admin@123`   | —                              |
+| Employee | `OIJODO20260001`  | `Welcome@123` | Must change password on first login |
+
 Other backend scripts:
 
 ```bash
