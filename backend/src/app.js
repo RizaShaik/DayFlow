@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
@@ -19,6 +20,7 @@ export function createApp() {
   );
   app.use(express.json({ limit: '1mb' }));
   app.use(express.urlencoded({ extended: true }));
+  app.use(cookieParser());
   app.use(morgan(isProduction ? 'combined' : 'dev'));
 
   const apiLimiter = rateLimit({
