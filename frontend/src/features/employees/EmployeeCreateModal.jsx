@@ -70,9 +70,27 @@ export function EmployeeCreateModal({ onClose, onCreated }) {
       <Modal title="Employee added" onClose={onClose}>
         <Alert variant="success">
           {form.firstName} {form.lastName} has been added with Login ID{' '}
-          <strong>{result.loginId}</strong>. Their temporary password was emailed to them (or
-          logged to the server console if SMTP isn't configured).
+          <strong>{result.loginId}</strong>.
         </Alert>
+        {result.tempPassword ? (
+          <div className="mt-4 rounded-md border border-warning/30 bg-warning/10 p-4 text-sm">
+            <p className="text-text">
+              SMTP isn&rsquo;t configured, so this wasn&rsquo;t emailed — share it with them
+              directly:
+            </p>
+            <p className="mt-2 font-mono text-base font-semibold text-text">
+              {result.tempPassword}
+            </p>
+            <p className="mt-2 text-xs text-text-muted">
+              They&rsquo;ll be asked to set a new password on first login. This won&rsquo;t be
+              shown again.
+            </p>
+          </div>
+        ) : (
+          <p className="mt-4 text-sm text-text-muted">
+            Their temporary password was emailed to them.
+          </p>
+        )}
         <Button className="mt-4" onClick={onClose}>
           Done
         </Button>

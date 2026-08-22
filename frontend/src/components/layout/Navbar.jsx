@@ -3,7 +3,9 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { Avatar } from '../common/Avatar.jsx';
 import { Logo } from '../common/Logo.jsx';
 import { ThemeToggle } from './ThemeToggle.jsx';
+import { CheckInOutWidget } from '../../features/attendance/CheckInOutWidget.jsx';
 import { useAuth } from '../../hooks/useAuth.js';
+import { resolveAssetUrl } from '../../utils/resolveAssetUrl.js';
 
 const navLinkClass = ({ isActive }) =>
   `flex h-16 items-center border-b-2 text-sm font-medium transition-colors ${
@@ -27,10 +29,20 @@ export function Navbar() {
     <header className="border-b border-border bg-surface">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
         <div className="flex items-center gap-8">
-          <NavLink to="/employees">
+          <NavLink to="/" className="flex items-center gap-2">
             <Logo height={26} />
+            {user?.company?.logoUrl && (
+              <img
+                src={resolveAssetUrl(user.company.logoUrl)}
+                alt={`${user.company.name} logo`}
+                className="h-7 w-7 rounded-full border border-border object-cover"
+              />
+            )}
           </NavLink>
           <nav className="flex items-center gap-6">
+            <NavLink to="/" end className={navLinkClass}>
+              Dashboard
+            </NavLink>
             <NavLink to="/employees" className={navLinkClass}>
               Employees
             </NavLink>
@@ -44,6 +56,7 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-4">
+          <CheckInOutWidget />
           <ThemeToggle />
           <div className="relative">
             <button

@@ -2,18 +2,28 @@ import { useEffect, useState } from 'react';
 import { employeesApi } from '../../api/employeesApi.js';
 import { departmentsApi } from '../../api/departmentsApi.js';
 import { EmployeeCard } from './EmployeeCard.jsx';
+import { EmployeeCreateModal } from './EmployeeCreateModal.jsx';
+import { Button } from '../../components/common/Button.jsx';
+import { useAuth } from '../../hooks/useAuth.js';
+import { useSocket } from '../../hooks/useSocket.js';
 
 export function EmployeeListPage() {
+  const { user } = useAuth();
+  const socket = useSocket();
+  const canCreate = user?.role === 'admin' || user?.role === 'hr';
+
   const [employees, setEmployees] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [search, setSearch] = useState('');
   const [departmentId, setDepartmentId] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     departmentsApi.list().then(setDepartments).catch(() => setDepartments([]));
-  }, []);
+  }, [refreshKey]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -40,7 +50,20 @@ export function EmployeeListPage() {
       clearTimeout(timeout);
       controller.abort();
     };
-  }, [search, departmentId]);
+  }, [search, departmentId, refreshKey]);
+
+  // Real-time: a coworker checking in/out updates their card's status dot
+  // for everyone currently viewing the directory, no refetch needed.
+  useEffect(() => {
+    if (!socket) return;
+    function handleAttendanceUpdate({ employeeId, status }) {
+      setEmployees((prev) =>
+        prev.map((e) => (e.id === employeeId ? { ...e, status } : e))
+      );
+    }
+    socket.on('attendance:update', handleAttendanceUpdate);
+    return () => socket.off('attendance:update', handleAttendanceUpdate);
+  }, [socket]);
 
   return (
     <div className="space-y-6">
@@ -68,6 +91,7 @@ export function EmployeeListPage() {
               </option>
             ))}
           </select>
+          {canCreate && <Button onClick={() => setShowCreateModal(true)}>New</Button>}
         </div>
       </div>
 
@@ -83,6 +107,13 @@ export function EmployeeListPage() {
             <EmployeeCard key={employee.id} employee={employee} />
           ))}
         </div>
+      )}
+
+      {showCreateModal && (
+        <EmployeeCreateModal
+          onClose={() => setShowCreateModal(false)}
+          onCreated={() => setRefreshKey((k) => k + 1)}
+        />
       )}
     </div>
   );

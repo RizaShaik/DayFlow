@@ -1,4 +1,7 @@
+import { useState } from 'react';
 import { formatCurrency } from '../../../utils/formatCurrency.js';
+import { Button } from '../../../components/common/Button.jsx';
+import { SalaryConfigModal } from '../SalaryConfigModal.jsx';
 
 const COMPONENT_LABELS = {
   basic: 'Basic Salary',
@@ -12,26 +15,51 @@ const COMPONENT_LABELS = {
   professional_tax: 'Professional Tax',
 };
 
-export function SalaryInfoTab({ salaryInfo }) {
+export function SalaryInfoTab({ employeeId, salaryInfo, isPrivileged, onConfigured }) {
+  const [showModal, setShowModal] = useState(false);
+
   if (!salaryInfo) {
-    return <p className="text-sm text-text-muted">No salary structure configured yet.</p>;
+    return (
+      <div className="space-y-4">
+        <p className="text-sm text-text-muted">No salary structure configured yet.</p>
+        {isPrivileged && <Button onClick={() => setShowModal(true)}>Configure Salary</Button>}
+        {showModal && (
+          <SalaryConfigModal
+            employeeId={employeeId}
+            currentSalaryInfo={null}
+            onClose={() => setShowModal(false)}
+            onSaved={(info) => {
+              setShowModal(false);
+              onConfigured(info);
+            }}
+          />
+        )}
+      </div>
+    );
   }
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div>
-          <p className="text-xs text-text-muted">Month Wage</p>
-          <p className="text-sm text-text">{formatCurrency(salaryInfo.monthlyWage)}</p>
+      <div className="flex items-start justify-between">
+        <div className="grid flex-1 grid-cols-1 gap-4 sm:grid-cols-3">
+          <div>
+            <p className="text-xs text-text-muted">Month Wage</p>
+            <p className="text-sm text-text">{formatCurrency(salaryInfo.monthlyWage)}</p>
+          </div>
+          <div>
+            <p className="text-xs text-text-muted">Working Days / Week</p>
+            <p className="text-sm text-text">{salaryInfo.workingDaysPerWeek}</p>
+          </div>
+          <div>
+            <p className="text-xs text-text-muted">Break Time</p>
+            <p className="text-sm text-text">{salaryInfo.breakTimeHours} hrs</p>
+          </div>
         </div>
-        <div>
-          <p className="text-xs text-text-muted">Working Days / Week</p>
-          <p className="text-sm text-text">{salaryInfo.workingDaysPerWeek}</p>
-        </div>
-        <div>
-          <p className="text-xs text-text-muted">Break Time</p>
-          <p className="text-sm text-text">{salaryInfo.breakTimeHours} hrs</p>
-        </div>
+        {isPrivileged && (
+          <Button variant="ghost" onClick={() => setShowModal(true)}>
+            Edit
+          </Button>
+        )}
       </div>
 
       <div className="overflow-x-auto rounded-md border border-border">
@@ -56,6 +84,18 @@ export function SalaryInfoTab({ salaryInfo }) {
           </tbody>
         </table>
       </div>
+
+      {showModal && (
+        <SalaryConfigModal
+          employeeId={employeeId}
+          currentSalaryInfo={salaryInfo}
+          onClose={() => setShowModal(false)}
+          onSaved={(info) => {
+            setShowModal(false);
+            onConfigured(info);
+          }}
+        />
+      )}
     </div>
   );
 }
