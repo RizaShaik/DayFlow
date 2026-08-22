@@ -6,6 +6,27 @@ Dayflow is a full-stack HRMS: secure auth, role-based dashboards (Admin/HR vs Em
 employee profiles, attendance (check-in/out with live status), leave/time-off management
 with approvals, and payroll/salary structure with automatic component calculation.
 
+## Features
+
+- **Auth:** company sign-up with email verification, sign-in by Login ID or email, JWT access
+  tokens + httpOnly-cookie refresh tokens, forced password change for admin-created accounts.
+- **Dashboards:** employee (quick-access cards, today's status, recent time-off activity) and
+  admin/HR (headcount, present-today count, pending approvals with inline decisions).
+- **Employee directory & profiles:** searchable/filterable directory with live status dots
+  (present/on-leave/absent), tabbed profile (Profile, Resume, Private Info, Bank Details, Salary
+  Info) — sensitive tabs gated to the employee themselves or an admin/HR viewer, enforced
+  server-side. Admin can create employees (auto-generated Login ID + temp password) and edit any
+  profile; employees can edit their own limited fields and avatar.
+- **Attendance:** self-service check-in/check-out with a live navbar widget, monthly self-view
+  with work/extra-hours breakdown, admin/HR company-wide daily view — status changes propagate
+  live to every connected client via Socket.IO.
+- **Time off:** apply for Paid/Sick/Unpaid leave (sick requires an attachment) against a
+  per-year balance, admin/HR approve or reject — approval deducts the balance and marks
+  attendance for the leave period.
+- **Payroll:** admin configures an employee's monthly wage; Basic/HRA/allowances/PF/professional
+  tax are all auto-computed and always foot back exactly to the wage.
+- **Light/dark theme** throughout, persisted across sessions.
+
 ## Tech stack
 
 - **Frontend:** React (Vite), React Router, Tailwind CSS, Axios, Socket.IO client
@@ -111,12 +132,6 @@ DayFlow/
         ├── context/            # Theme, Auth, Socket providers
         ├── hooks/
         ├── components/         # common (design system) + layout
-        ├── features/           # auth, employees, attendance, timeoff, dashboard
+        ├── features/           # auth, employees, attendance, timeoff, payroll, dashboard
         └── routes/
 ```
-
-## Development workflow
-
-This project is built in phases (auth → employee directory/profile → attendance → time off →
-payroll → dashboards/polish). Each phase is verified working end-to-end before moving to the
-next.
