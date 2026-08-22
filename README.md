@@ -54,6 +54,11 @@ Verify it's up: `curl http://localhost:5000/api/v1/health` should return
 | Admin/HR | `OIADUS20260001`  | `Admin@123`   | —                              |
 | Employee | `OIJODO20260001`  | `Welcome@123` | Must change password on first login |
 
+**Auth / email verification:** Sign Up creates a new company + Admin account and requires email
+verification before sign-in. If `SMTP_HOST` is left blank in `backend/.env`, no real email is
+sent — the verification link is printed to the backend console instead, so the flow is fully
+testable without SMTP credentials. Set `SMTP_HOST`/`SMTP_USER`/`SMTP_PASSWORD` to send real email.
+
 Other backend scripts:
 
 ```bash

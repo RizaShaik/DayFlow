@@ -1,7 +1,7 @@
 -- Dayflow HRMS — reference schema snapshot.
 -- The source of truth is the numbered files in src/db/migrations/ (applied
 -- via `npm run migrate`); this file mirrors that state for quick reading.
--- Currently in sync with: migrations/001_init.sql
+-- Currently in sync with: migrations/001_init.sql, migrations/002_auth.sql
 
 -- Design notes:
 --   * Every tenant-scoped table carries company_id so a single deployment can
@@ -49,10 +49,23 @@ CREATE TABLE users (
   password_reset_expires_at TIMESTAMPTZ,
   created_at              TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at              TIMESTAMPTZ NOT NULL DEFAULT now(),
-  UNIQUE (company_id, email)
+  UNIQUE (email)
 );
 
 CREATE INDEX idx_users_company ON users(company_id);
+
+-- Refresh tokens are stored hashed (never the raw token) so a leaked DB
+-- doesn't hand out live sessions, and so logout/rotation can revoke them.
+CREATE TABLE refresh_tokens (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id       UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  token_hash    TEXT NOT NULL UNIQUE,
+  expires_at    TIMESTAMPTZ NOT NULL,
+  revoked_at    TIMESTAMPTZ,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_refresh_tokens_user ON refresh_tokens(user_id);
 
 -- ── Employees ─────────────────────────────────────────────────────────────
 
