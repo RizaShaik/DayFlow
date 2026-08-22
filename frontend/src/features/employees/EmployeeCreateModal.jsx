@@ -73,17 +73,14 @@ export function EmployeeCreateModal({ onClose, onCreated }) {
           <strong>{result.loginId}</strong>.
         </Alert>
         {result.tempPassword ? (
-          <div className="mt-4 rounded-md border border-warning/30 bg-warning/10 p-4 text-sm">
-            <p className="text-text">
-              SMTP isn&rsquo;t configured, so this wasn&rsquo;t emailed — share it with them
-              directly:
-            </p>
+          <div className="mt-4 rounded-md border border-border bg-surface-alt p-4 text-sm">
+            <p className="text-text">Temporary password:</p>
             <p className="mt-2 font-mono text-base font-semibold text-text">
               {result.tempPassword}
             </p>
             <p className="mt-2 text-xs text-text-muted">
               They&rsquo;ll be asked to set a new password on first login. This won&rsquo;t be
-              shown again.
+              shown again — share it with them directly.
             </p>
           </div>
         ) : (
